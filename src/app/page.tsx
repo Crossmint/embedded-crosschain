@@ -17,7 +17,7 @@ import Crossmint from "./components/Crossmint";
 
 const config = getDefaultConfig({
   appName: "Crossmint Crosschain Demo",
-  projectId: "0ba14b99010e8e22edb5b53ce5372a17",
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || "",
   chains: [arbitrumSepolia, baseSepolia, optimismSepolia, sepolia],
   ssr: true,
 });
