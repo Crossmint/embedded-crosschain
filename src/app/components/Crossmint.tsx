@@ -1,3 +1,8 @@
+import { useState } from "react";
+import CryptoCheckout from "./CryptoCheckout";
+import FiatCheckout from "./FiatCheckout";
+import Minting from "./Minting";
+
 interface CrossmintProps {
   minting: boolean;
   setMinting: Function;
@@ -11,6 +16,31 @@ const Crossmint: React.FC<CrossmintProps> = ({
   paymentMethod,
   setPaymentMethod,
 }) => {
+  const [orderIdentifier, setOrderIdentifier] = useState("");
+
+  const handlePaymentEvent = (event: any) => {
+    switch (event.type) {
+      case "crypto-payment:user-accepted":
+        // If you want to add a message about crypto payment being confirmed
+        // this is the place to do it.
+        console.log("crypto-payment:user-accepted", event);
+        break;
+
+      case "payment:process.started":
+        console.log("payment:process.started", event);
+        setMinting(true);
+        break;
+
+      case "payment:process.succeeded":
+        console.log(event);
+        setOrderIdentifier(event.payload.orderIdentifier);
+        break;
+      default:
+        console.log(event);
+        break;
+    }
+  };
+
   type PaymentMethod = "ETH" | "fiat";
   const getButtonClass = (method: PaymentMethod) => {
     let baseClass =
@@ -44,11 +74,15 @@ const Crossmint: React.FC<CrossmintProps> = ({
           </button>
         </div>
 
-        {paymentMethod === "ETH" ? (
-          <h2 className="text-black">Crypto Checkout</h2>
-        ) : paymentMethod === "fiat" ? (
-          <h2 className="text-black">Fiat Checkout</h2>
-        ) : null}
+        {!orderIdentifier ? (
+          paymentMethod === "ETH" ? (
+            <CryptoCheckout paymentHandler={handlePaymentEvent} />
+          ) : paymentMethod === "fiat" ? (
+            <FiatCheckout paymentHandler={handlePaymentEvent} />
+          ) : null
+        ) : (
+          <Minting orderIdentifier={orderIdentifier} />
+        )}
       </div>
     </>
   );
